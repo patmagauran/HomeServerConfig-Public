@@ -1,0 +1,46 @@
+version: "3.9"
+########################### SECRETS
+
+########################### SERVICES
+services:
+  # Dashboard - Frontend
+  dashboard:
+    container_name: dashboard
+    image: phntxx/dashboard:latest
+#    user: $DOCKERRUNNER:$DOCKERFILES
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:8080 || exit 1
+      interval: 10s
+      timeout: 30s
+      retries: 10
+    depends_on:
+      - traefik
+    # profiles:
+    # - apps
+    networks:
+      - net-t2-proxy
+
+    # ports:
+    #   - "$ORGANIZR_PORT:80"
+    volumes:
+      - $APPDATA/dashboard:/app/data
+      - /var/cache
+      - /tmp
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.dashboard-rtr.entrypoints=https"
+      - "traefik.http.routers.dashboard-rtr.rule=Host(`$DOMAINNAME0`) || Host(`www.$DOMAINNAME0`)"
+      #- "traefik.http.routers.organizr-rtr.rule=Host(`organizr.$DOMAINNAME0`)"
+      ## Middlewares
+      - "traefik.http.routers.dashboard-rtr.middlewares=dashboard-redirect@docker,chain-oauth@file" # Redirect non-www to www middleware
+      - "traefik.http.middlewares.dashboard-redirect.redirectregex.regex=^https?://$DOMAINNAME0/(.*)"
+      - "traefik.http.middlewares.dashboard-redirect.redirectregex.replacement=https://www.$DOMAINNAME0/$${1}"
+      - "traefik.http.middlewares.dashboard-redirect.redirectregex.permanent=true"
+      ## HTTP Services
+      - "traefik.http.routers.dashboard-rtr.service=dashboard-svc"
+      - "traefik.http.services.dashboard-svc.loadbalancer.server.port=8080"

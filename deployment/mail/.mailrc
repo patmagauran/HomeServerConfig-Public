@@ -1,0 +1,8 @@
+set smtp-use-starttls
+set ssl-verify=ignore
+set smtp-auth=login
+set smtp=smtp://smtp.sendgrid.net:587
+set from="norepy@notifications.example.com(Server No Reply)"
+set smtp-auth-user=apikey
+set smtp-auth-password=SENDGRID_API_KEY
+set ssl-verify=ignore

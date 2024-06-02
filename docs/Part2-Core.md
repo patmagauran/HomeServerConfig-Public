@@ -2,6 +2,16 @@
 
 In this part I will walk through the steps and components to setup a host from scratch with our core infrastructure. This will include: Installing Debian as our OS, installing docker, setting up our docker user, file structure, and networking. I will include a rough ansible playbook in the repository if you want to try to use it. However, it needs a lot of work to properly match the final environment correctly and I still recommend at least reading through the steps below.
 
+
+# A note on config files and such
+This setup involves numerous config files which may include sensitive data(emails, api keys, passwords, urls, etc). In the version in this repo those have all been replaced with placeholders. All domains have been replaced by 'example.com' and most config elements have been replaced with a descriptor surrounded by brackets. For example if a config calls for a to email, a from email, and an api key it will look like this:
+
+```
+EMAIL_TO=<YOUR EMAIL HERE>
+EMAIL_FROM=noreply@notifications.example.com
+EMAIL_KEY=<YOUR EMAIL SERVICE API KEY HERE>
+```
+
 # Step 1: Install Debian
 For the purposes of this guide I will be using Debian 12.5(Bullseye). I will be writing this guide as I setup everything in a fresh VM, so you can expect the steps to be fairly complete. For most of the Debian install, you should use reasonable defaults.  However, here is a small list of deviations I made:
  - I chose to disable the root account and instead give my account sudo privleges(Which we will provide additional protection for later).

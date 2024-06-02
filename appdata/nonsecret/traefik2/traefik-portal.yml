@@ -1,0 +1,84 @@
+global:
+    checkNewVersion: true
+    sendAnonymousUsage: true
+entryPoints:
+    http:
+        address: ":80"
+        # http:
+        #     redirections:
+        #         entryPoint:
+        #             to: https
+        #             scheme: https
+    https:
+        address: ":443"
+        # Allow these IPs to set the X-Forwarded-* headers - Cloudflare IPs: https://www.cloudflare.com/ips/
+        forwardedHeaders:
+            trustedIPs: 
+              - "173.245.48.0/20"
+              - "103.21.244.0/22"
+              - "103.22.200.0/22"
+              - "103.31.4.0/22"
+              - "141.101.64.0/18"
+              - "108.162.192.0/18"
+              - "190.93.240.0/20"
+              - "188.114.96.0/20"
+              - "197.234.240.0/22"
+              - "198.41.128.0/17"
+              - "162.158.0.0/15"
+              - "104.16.0.0/12"
+              - "172.64.0.0/13"
+              - "131.0.72.0/22"
+        http:
+            tls:   # Add dns-cloudflare as default certresolver for all services. Also enables TLS and no need to specify on individual services
+                options: tls-opts@file
+                certResolver: dns-cloudflare
+                domains:
+                    - main: example.com
+                      sans: "*.example.com"
+                    - main: portal.example.com
+                      sans: "*.portal.example.com"
+    traefik:
+        address: ":8080"
+api:
+   dashboard: true
+#   insecure: true
+#serversTransport:
+#   insecureSkipVerify: true
+ping: {}
+
+log:
+    level: WARN # (Default: error) 
+metrics:
+  prometheus:
+    manualRouting: true
+accessLog:
+    filePath: /traefik.log
+    bufferingSize: 100 # Configuring a buffer of 100 lines
+    filters:
+        statusCodes: 400-499
+providers:
+    docker:
+     # - --providers.docker.endpoint=unix:///var/run/docker.sock # Use Docker Socket Proxy instead for improved security
+        endpoint: tcp://socket-proxy:2375
+         # Automatically set Host rule for services
+      # - --providers.docker.defaultrule=Host(`{{ index .Labels "com.docker.compose.service" }}.$DOMAINNAME0`)
+#        defaultrule: Host(`{{ index .Labels "com.docker.compose.service" }}.example.com`)
+        exposedByDefault: false
+        network: net-t2-proxy
+        swarmMode: false
+    file:
+        directory: /rules # Load dynamic configuration from one or more .toml or .yml files in a directory.
+        #filename: /path/to/file # Load dynamic configuration from a file.
+        watch: true # Only works on top level files in the rules folder
+certificatesResolvers:
+    dns-cloudflare:
+        acme:
+#            caServer: https://acme-staging-v02.api.letsencrypt.org/directory # LetsEncrypt Staging Server - uncomment when testing
+            email: ,YOUR CLOUDLFARE EMAIL>
+            storage: /acme.json
+            dnsChallenge:
+                provider: cloudflare
+                resolvers:
+                    - 1.1.1.1:53
+                    - 1.0.0.1:53
+                delayBeforeCheck: 90

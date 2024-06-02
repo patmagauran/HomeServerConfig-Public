@@ -1,0 +1,1 @@
+sudo docker-compose -f docker-compose-Core.yml -f docker-compose-apps-portal.yml -f docker-compose-management-portal.yml up -d --remove-orphans

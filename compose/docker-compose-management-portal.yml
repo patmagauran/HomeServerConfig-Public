@@ -1,0 +1,46 @@
+version: "3.9"
+########################### SERVICES
+services:
+  # Portainer - WebUI for Containers
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ce:2.19.4-alpine
+    restart: unless-stopped
+    # profiles:
+    # - apps
+    # command: -H unix:///var/run/docker.sock # # Use Docker Socket Proxy instead for improved security
+    command: -H tcp://socket-proxy:2375
+    networks:
+      - net-t2-proxy
+      - net-socket-proxy
+    user: $DOCKERRUNNER:$DOCKERFILES
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:9000/api/system/status || exit 1
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      - traefik
+      - socket-proxy
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      # - /var/run/docker.sock:/var/run/docker.sock:ro # # Use Docker Socket Proxy instead for improved security
+      - $NONGITDIR/portainer/data:/data # Change to local directory if you want to save/transfer config locally
+    environment:
+      - TZ=$TZ
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.portainer-rtr.entrypoints=https"
+      - "traefik.http.routers.portainer-rtr.rule=Host(`portainer.$DOMAINNAME0`)"
+      ## Middlewares
+      - "traefik.http.routers.portainer-rtr.middlewares=chain-oauth@file"
+      ## HTTP Services
+      - "traefik.http.routers.portainer-rtr.service=portainer-svc"
+      - "traefik.http.services.portainer-svc.loadbalancer.server.port=9000"
+      - wud.tag.include=^\d+\.\d+\.\d+-alpine$$
+      - wud.link.template=https://newreleases.io/github/portainer/portainer?version=$${major}.$${minor}.$${patch}
+

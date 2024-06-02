@@ -1,0 +1,19 @@
+version: 2
+
+locations:
+  homeserverconfigs-portal:
+    from: /mnt/HomeServerConfigs
+    to:
+      - local
+    cron: '0 */6 * * *' # Every Sunday at 3:00
+    options:
+      backup:
+        exclude:
+          - appdata/secret/
+          - compose/
+          - deployment/
+          - apps/
+backends:
+  local:
+    type: local
+    path: /backups

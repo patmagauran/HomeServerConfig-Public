@@ -1,6 +1,4 @@
 version: "3.9"
-
-
 ########################### NETWORKS
 # There is no need to create any networks outside this docker-compose file.
 # You may customize the network subnets (192.168.90.0/24 and 91.0/24) below as you please.
@@ -21,7 +19,6 @@ networks:
     ipam:
       config:
         - subnet: 172.16.1.0/24
-
 ########################### SECRETS
 secrets:
   htpasswd:
@@ -38,19 +35,10 @@ secrets:
 ########################### SERVICES
 services:
   ############################# FRONTENDS
-
-  # Traefik 2 - Reverse Proxy
-  # Touch (create empty files) traefik.log and acme/acme.json. Set acme.json permissions to 600.
-  # touch $DOCKERDIR/traefik2/acme/acme.json
-  # chmod 600 $DOCKERDIR/traefik2/acme/acme.json
-  # touch $DOCKERDIR/traefik2/traefik.log
   traefik:
     container_name: traefik
-    image: traefik:2.11.0 # brie v2.5.x livarot v2.4.x # picodon v2.3.x
-    #restart: always
+    image: traefik:2.11.0
     restart: unless-stopped
-    # profiles:
-    # - core
     command: # CLI arguments
       - --configFile=/traefik.yml
     networks:
@@ -108,10 +96,6 @@ services:
       - "traefik.http.routers.traefik-rtr.rule=Host(`traefik.$DOMAINNAMEHOST`)"
       ## Services - API
       - "traefik.http.routers.traefik-rtr.service=api@internal"
-      ## Healthcheck/ping
-      #- "traefik.http.routers.ping.rule=Host(`traefik.$DOMAINNAME0`) && Path(`/ping`)"
-      #- "traefik.http.routers.ping.tls=true"
-      #- "traefik.http.routers.ping.service=ping@internal"
       ## Middlewares
       - "traefik.http.routers.traefik-rtr.middlewares=chain-oauth@file"
       ##For Metrics Endpoint
@@ -119,17 +103,11 @@ services:
       - "traefik.http.routers.metrics-rtr.rule=Host(`metrics.$DOMAINNAMEHOST`)"
       ## Services - API
       - "traefik.http.routers.metrics-rtr.service=prometheus@internal"
-      ## Healthcheck/ping
-      #- "traefik.http.routers.ping.rule=Host(`traefik.$DOMAINNAME0`) && Path(`/ping`)"
-      #- "traefik.http.routers.ping.tls=true"
-      #- "traefik.http.routers.ping.service=ping@internal"
       ## Middlewares
       - "traefik.http.routers.metrics-rtr.middlewares=chain-oauth@file"
       - wud.tag.include=^\d+\.\d+\.\d+$$
       - wud.link.template=https://newreleases.io/github/traefik/traefik?version=v$${major}.$${minor}.$${patch}
-
-
-  # Docker Socket Proxy - Security Enchanced Proxy for Docker Socket
+# Docker Socket Proxy - Security Enchanced Proxy for Docker Socket
   socket-proxy:
     container_name: socket-proxy
     image: tecnativa/docker-socket-proxy
@@ -149,11 +127,6 @@ services:
       interval: 10s
       timeout: 30s
       retries: 10
-    # privileged: true
-    #ports:
-    # - "127.0.0.1:2375:2375" # Port 2375 should only ever get exposed to the internal network. When possible use this line.
-    # I use the next line instead, as I want portainer to manage multiple docker endpoints within my home network.
-    # - "2375:2375"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - /var/lib/haproxy
@@ -192,8 +165,7 @@ services:
       - VOLUMES=1 # Portainer
     labels:
       - wud.link.template=https://newreleases.io/github/tecnativa/docker-socket-proxy?version=$${raw}
-
-  # Google OAuth - Single Sign On using OAuth 2.0
+# Google OAuth - Single Sign On using OAuth 2.0
   # https://www.smarthomebeginner.com/google-oauth-with-traefik-docker/
   oauth:
     container_name: oauth
@@ -209,10 +181,6 @@ services:
     read_only: true
     security_opt:
       - no-new-privileges:true
-    # Allow apps to bypass OAuth. Radarr example below will bypass OAuth if API key is present in the request (eg. from NZB360 mobile app).
-    # While this is one way, the recommended way is to bypass authentication using Traefik labels shown in some of the apps later.
-    # command: --rule.radarr.action=allow --rule.radarr.rule="Headers(`X-Api-Key`, `$RADARR_API_KEY`)"
-    # command: --rule.sabnzbd.action=allow --rule.sabnzbd.rule="HeadersRegexp(`X-Forwarded-Uri`, `$SABNZBD_API_KEY`)"
     environment:
       - CONFIG=/config
       - COOKIE_DOMAIN=$DOMAINNAMEROOT
@@ -243,8 +211,7 @@ services:
       - "traefik.http.services.oauth-svc.loadbalancer.server.port=4181"
       - wud.tag.include=^\d+\.\d+\.\d+-arm$$
       - wud.link.template=https://newreleases.io/github/thomseddon/traefik-forward-auth?version=v$${major}.$${minor}.$${patch}
-
-  whatsupdocker:
+whatsupdocker:
     image: ghcr.io/patmagauran/whats-up-docker:latest
     container_name: wud
  #   user: $DOCKERRUNNER:$DOCKERFILES
@@ -255,7 +222,7 @@ services:
     env_file:
       - $SECRETDIR/wud.env
       - $APPDATA/wud.env
-      - $APPDATA/wud-portal.env
+      - $APPDATA/wud$HOSTTAG.env
     healthcheck:
       test: wget --no-verbose --tries=1 --no-check-certificate --spider http://localhost:3000
       interval: 10s
@@ -285,7 +252,7 @@ services:
       ## HTTP Services
       - "traefik.http.routers.whatsupdocker-rtr.service=whatsupdocker-svc"
       - "traefik.http.services.whatsupdocker-svc.loadbalancer.server.port=3000"
-  backup:
+ backup:
     container_name: autorestic
     image: ghcr.io/patmagauran/autorestic-docker:main
     user: $DOCKERRUNNER:$DOCKERFILES
@@ -299,7 +266,7 @@ services:
       - $SECRETDIR/autorestic.env
     volumes:
       - /var/dockers/HomeServerConfigs:/mnt/HomeServerConfigs:ro
-      - $APPDATA/autorestic/autorestic-portal.yml:/app/autorestic.yml:ro
+      - $APPDATA/autorestic/autorestic$HOSTTAG.yml:/app/autorestic.yml:ro
       - $NONGITDIR/autorestic/cache:/.cache/restic
       - /app/
       - /.cache
@@ -325,6 +292,3 @@ services:
       - "CRON=30 */6 * * *" 
       - "FORCE_SYNC=1"
       - "SYNC_OPTS=-v --b2-hard-delete"
-    # secrets:
-    #   - b2_aws_key
-    #   - b2_aws_key_id

@@ -1,0 +1,88 @@
+version: "3.9"
+########################### SECRETS
+secrets:
+  mysql_root_password:
+    file: $SECRETDIR/mysql_root_password
+########################### SERVICES
+services:
+  # Dashboard - Frontend
+  
+
+  nextcloud:
+    container_name: nextcloud
+    image: nextcloud:28-apache
+    restart: always
+  ##  user: $DOCKERRUNNER:$DOCKERFILES
+    healthcheck:
+      test: curl -sSf 'http://localhost/status.php' | grep '"installed":true' || exit 1
+      interval: 10s
+      timeout: 30s
+      retries: 10
+    depends_on:
+      - traefik
+    #read_only: true
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - net-t2-proxy
+      - db_net
+#    ports:
+#      - "443:443"
+    volumes:
+      - $NONGITDIR/nextcloud:/var/www/html
+      - /mnt/data/nextcloudData:/data
+      - /mnt/data/media:/media_data
+    environment:
+      - TZ=$TZ
+      - NEXTCLOUD_TRUSTED_DOMAIN=nextcloud.$DOMAINNAME
+      - NEXTCLOUD_DATA_DIR=/data
+      ### Add local network as a trusted proxy - It's better to set the actual Traefik IP.
+      ###   We will give it the range listed in the accompanying Traefik guide
+      - TRUSTED_PROXIES=172.16.0.250
+      - OVERWRITEPROTOCOL=https
+      - REDIS_HOST=redis
+  #    - REDIS_HOST_PASSWORD=1234
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.nextcloud.entrypoints=https"
+      - "traefik.http.routers.nextcloud.rule=Host(`nextcloud.$DOMAINNAME`)"
+      - "traefik.http.routers.nextcloud.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.nextcloud.middlewares=chain-nextcloud@file"
+      ## HTTP Services
+      - "traefik.http.routers.nextcloud.service=nextcloud"
+      - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
+      - wud.tag.include=^\d+\.\d+\.\d+-apache$$
+      - wud.watch.digest=true
+      - wud.link.template=https://newreleases.io/github/nextcloud/server?version=v$${major}.$${minor}.$${patch}
+  nextcloud-cron:
+    container_name: nextcloud-cron
+    image: nextcloud:28-apache
+    restart: always
+    entrypoint: /cron.sh
+  ##  user: $DOCKERRUNNER:$DOCKERFILES
+    depends_on:
+      - traefik
+    #read_only: true
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - net-t2-proxy
+      - db_net
+#    ports:
+#      - "443:443"
+    volumes:
+      - $NONGITDIR/nextcloud:/var/www/html
+      - /mnt/data/nextcloudData:/data
+      - /mnt/data/media:/media_data
+    environment:
+      - TZ=$TZ
+      - NEXTCLOUD_TRUSTED_DOMAIN=nextcloud.$DOMAINNAME
+      - NEXTCLOUD_DATA_DIR=/data
+      - OVERWRITEPROTOCOL=https
+      ### Add local network as a trusted proxy - It's better to set the actual Traefik IP.
+      ###   We will give it the range listed in the accompanying Traefik guide
+      - TRUSTED_PROXIES=172.16.0.250
+      - REDIS_HOST=redis
+  #    - REDIS_HOST_PASSWORD=1234

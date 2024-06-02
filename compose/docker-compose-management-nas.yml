@@ -1,0 +1,38 @@
+version: "3.9"
+########################### NETWORKS
+########################### SECRETS
+
+########################### SERVICES
+services:
+
+  portaineragent:
+    image: portainer/agent:2.19.4
+    container_name: portainer_agent
+    restart: unless-stopped
+    # healthcheck:
+    #  #$ test: "wget --no-check-certificate --no-verbose --tries=3 --spider --header='Content-Type:application/json' http://127.0.0.1:9001/ping || exit 1"
+    #   test: "/app/agent --health-check"
+    #   interval: 1m30s
+    #   timeout: 30s
+    #   retries: 5
+    #   start_period: 30s
+    depends_on:
+      - traefik
+    # profiles:
+    # - apps
+    # command: -H unix:///var/run/docker.sock # # Use Docker Socket Proxy instead for improved security
+    networks:
+      - net-t2-proxy
+   # user: $DOCKERRUNNER:$DOCKERFILES
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "9001:9001"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro # # Use Docker Socket Proxy instead for improved security
+      - $NONGITDIR/portainer-agent$HOSTTAG/data:/data # Change to local directory if you want to save/transfer config locally
+      - /app
+    labels:
+      - wud.tag.include=^\d+\.\d+\.\d+$$
+      - wud.link.template=https://newreleases.io/github/portainer/portainer?version=$${major}.$${minor}.$${patch}

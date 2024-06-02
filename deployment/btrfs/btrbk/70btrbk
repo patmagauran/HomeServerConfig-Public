@@ -1,0 +1,1 @@
+Dpkg::Pre-Invoke {"/usr/bin/btrbk run /mnt/btrfs_root/@rootfs";};

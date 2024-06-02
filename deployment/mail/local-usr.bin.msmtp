@@ -1,0 +1,2 @@
+  owner @{HOME}/.msmtp*.log wk,
+  /var/log/msmtp            wk,

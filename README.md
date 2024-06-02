@@ -2,7 +2,7 @@
 
 Hello! This will be a repository detailing how to setup your own server(s) using Docker and zero trust technologies. This will allow your services to be securely accessed anywhere using access controls you define.
 
-To begin, go to [Part 1 - Introduction](./Part1-Introduction.md)
+To begin, go to [Part 1 - Introduction](./docs/Part1-Introduction.md)
 
 
 

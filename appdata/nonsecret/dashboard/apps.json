@@ -1,0 +1,40 @@
+{
+    "apps": [
+        {
+            "name": "Traefik - Portal",
+            "displayURL": "traefik.portal.example.com",
+            "url": "https://traefik.portal.example.com/",
+            "icon": "dns"
+        },
+        {
+            "name": "Traefik - NAS",
+            "displayURL": "traefik.nas.example.com",
+            "url": "https://traefik.nas.example.com/",
+            "icon": "dns"
+        },
+        {
+            "name": "Portainer",
+            "displayURL": "portainer.example.com",
+            "url": "https://portainer.example.com",
+            "icon": "developer_board"
+        },
+        {
+            "name": "Zerotier UI",
+            "displayURL": "my.zerotier.com",
+            "url": "https://my.zerotier.com/#",
+            "icon": "vpn_lock"
+        },
+        {
+            "name": "Cloudflare",
+            "displayURL": "dash.cloudflare.com",
+            "url": "https://dash.cloudflare.com/",
+            "icon": "cloud_queue"
+        },
+        {
+            "name": "Nextcloud",
+            "displayURL": "nextcloud.nas.example.com",
+            "url": "https://nextcloud.nas.example.com/",
+            "icon": "storage"
+        }
+    ]
+}

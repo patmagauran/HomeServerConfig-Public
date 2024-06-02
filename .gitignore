@@ -1,0 +1,7 @@
+.env
+appdata/secret/*
+.vscode/
+
+appdata/nongit/*
+!appdata/secret/sample/
+!appdata/nongit/nongithere
