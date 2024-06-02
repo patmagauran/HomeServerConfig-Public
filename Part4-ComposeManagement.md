@@ -96,7 +96,7 @@ services:
       - "9001:9001"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro # # Use Docker Socket Proxy instead for improved security
-      - $APPDATA/portainer-agent$HOSTTAG/data:/data # Change to local directory if you want to save/transfer config locally
+      - $NONGITDIR/portainer-agent$HOSTTAG/data:/data # Change to local directory if you want to save/transfer config locally
       - /app
     labels:
       - wud.tag.include=^\d+\.\d+\.\d+$$

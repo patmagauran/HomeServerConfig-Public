@@ -188,7 +188,7 @@ You may be wondering about the other ports. They will get automatically added by
 
 To enable this script, you need to do the following:
 1. Install iptables-persistent: `sudo apt install iptables-persistent`
-2. Copy the rules above into a file in the /etc/iptables/rules.v4 directory
+2. Copy the rules above into the /etc/iptables/rules.v4 file. You will be overwriting the contents of this file. Feel free to back it up beforehand. (Note, this file is also in the deployment directory for easy copying)
 3. Enabled netfilter: `systemctl enable netfilter-persistent`
 4. run `netfilter-persistent reload`
 5. Restart Docker: `systemctl restart docker`

@@ -48,6 +48,8 @@ Add the following to your system cron by adding a file to /etc/cron.d/:
 0 3    * * *   dockerrunner    /var/dockers/HomeServerConfigs/compose/scripts/sync.sh
 ```
 
+Make sure to edit the script to be appropriate to your setup. It includes hooks to ping healthchecks
+
 # Auto run btrfs scans
 There are two main ways to automate btrfs checks: using the btrfsmaintenance toolset: https://github.com/kdave/btrfsmaintenance or using custom scripts.
 
@@ -87,8 +89,8 @@ and enable: `sudo systemctl enable smartd`
 A very useful ability is for btrfs to automatically perform a snapshot before any actions are performed via apt.
 
 1. Install btrbk `sudo apt install btrbk`
-2. Copy the config `cp deployment/btrbk/btrbk /etc/btrbk/btrbk.conf`
-3. Setup the apt triggers: `cp deployment/btrbk/70btrbk /etc/apt/apt.conf.d/70btrbk`
+2. Copy the config `cp deployment/btrfs/btrbk/btrbk /etc/btrbk/btrbk.conf`
+3. Setup the apt triggers: `cp deployment/btrfs/btrbk/70btrbk /etc/apt/apt.conf.d/70btrbk`
 4. Auto snapshot - check schedule: `btrbk run -n -S`
 5. Configure the cronjob: /etc/cron.hourly/btrbk:
 ```

@@ -339,6 +339,9 @@ This is another key piece of our puzzle. Google based oauth will be our authenti
 
 This requires some setup with google services: https://www.smarthomebeginner.com/traefik-forward-auth-google-oauth-2022/ You can follow that guide(Also note an older version was the major inspiration for the current state of this project.)
 
+## google_oauth_config
+Take the config you generate and copy it into the secrets folder so this container can access it
+
 
 # Section 6: Whats up docker
 ```
